@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AUCTORIS — Radar Sancionador (Acesso)</title>
+  <style>
+    :root{
+      /* PADRÃO-MÃE (Termômetro Regulatório) */
+      --bg0:#070A12;
+      --bg1:#0A1020;
+      --bg2:#0B1430;
+      --card:#0C1733;
+      --card2:#0B1A3B;
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.12);
+
+      --fg:#EAF0FF;
+      --muted:rgba(234,240,255,.68);
+      --muted2:rgba(234,240,255,.52);
+
+      --accent:#6EA8FF;
+      --accent2:#9CC4FF;
+      --ok:#46D39A;
+      --warn:#F2C14E;
+      --risk:#FF6B6B;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 14px;
+
+      --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--fg);
+      background:
+        radial-gradient(1200px 600px at 18% 10%, rgba(110,168,255,.10), transparent 60%),
+        radial-gradient(1000px 520px at 78% 18%, rgba(156,196,255,.08), transparent 60%),
+        radial-gradient(900px 520px at 50% 85%, rgba(110,168,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg0));
+      font-family: var(--sans);
+      line-height:1.5;
+      overflow-x:hidden;
+    }
+
+    a{ color:var(--accent2); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    .gridFX{
+      position:fixed; inset:0; pointer-events:none; opacity:.32;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse at 50% 18%, black 35%, transparent 70%);
+    }
+
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(7,10,18,.92), rgba(7,10,18,.60));
+      border-bottom:1px solid var(--line);
+    }
+    .topbarInner{
+      max-width:1240px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width: 280px;
+    }
+    .sigil{
+      width:36px; height:36px;
+      border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(156,196,255,.9), rgba(110,168,255,.25) 55%, rgba(110,168,255,.05));
+      box-shadow: 0 12px 30px rgba(110,168,255,.18);
+      border:1px solid rgba(156,196,255,.25);
+    }
+    .brandTitle{
+      display:flex; flex-direction:column;
+      gap:2px;
+    }
+    .brandTitle strong{
+      letter-spacing:.18em;
+      font-size:12px;
+      text-transform:uppercase;
+    }
+    .brandTitle span{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      width:100%;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(12,23,51,.40);
+      color:var(--fg);
+      padding:10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      display:flex; align-items:center; gap:10px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(156,196,255,.28);
+      background: rgba(12,26,65,.55);
+    }
+    .btnPrimary{
+      border-color: rgba(110,168,255,.35);
+      background: linear-gradient(180deg, rgba(110,168,255,.20), rgba(110,168,255,.08));
+      box-shadow: 0 20px 40px rgba(110,168,255,.10);
+    }
+    .btnGhost{
+      background: transparent;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(110,168,255,.10);
+    }
+
+    .shell{
+      max-width:1240px;
+      margin:0 auto;
+      padding:22px 16px 70px;
+      display:grid;
+      grid-template-columns: 340px 1fr;
+      gap:18px;
+    }
+
+    .side{
+      position:sticky;
+      top:76px;
+      align-self:start;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(12,23,51,.65), rgba(12,23,51,.35));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sideHeader{
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex; flex-direction:column;
+      gap:10px;
+    }
+    .sideHeader .h{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .sideHeader h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .badge{
+      font-size:11px;
+      color: rgba(234,240,255,.78);
+      border:1px solid rgba(255,255,255,.12);
+      padding:6px 10px;
+      border-radius: 999px;
+      background: rgba(7,10,18,.35);
+      white-space:nowrap;
+    }
+
+    .sideMeta{
+      display:grid; grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .metaCard{
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.28);
+      padding:10px 10px;
+      border-radius: 14px;
+    }
+    .metaCard .k{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:6px;
+    }
+    .metaCard .v{
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .nav{
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .nav a{
+      text-decoration:none;
+      color:var(--fg);
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.22);
+      padding:12px 12px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+    .nav a:hover{
+      transform: translateY(-1px);
+      border-color: rgba(110,168,255,.24);
+      background: rgba(12,26,65,.50);
+    }
+    .nav small{ color:var(--muted); font-weight:650; letter-spacing:.03em; }
+    .arrow{
+      width:26px; height:26px;
+      border-radius: 10px;
+      border:1px solid var(--line);
+      display:grid; place-items:center;
+      background: rgba(12,23,51,.35);
+    }
+    .arrow:before{
+      content:"›";
+      font-size:18px;
+      color: rgba(234,240,255,.75);
+      transform: translateX(1px);
+    }
+
+    .sideFooter{
+      padding:12px 14px 14px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      min-width:0;
+    }
+
+    .hero{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(110,168,255,.14), rgba(12,23,51,.58) 45%, rgba(12,23,51,.34));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero:after{
+      content:"";
+      position:absolute; inset:-20%;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(156,196,255,.22), transparent 45%),
+        radial-gradient(circle at 75% 40%, rgba(110,168,255,.16), transparent 45%);
+      transform: rotate(-8deg);
+      pointer-events:none;
+      opacity:.8;
+    }
+    .heroInner{
+      position:relative;
+      padding:20px 18px;
+      display:flex;
+      gap:16px;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .hero h1{
+      margin:0;
+      font-size:26px;
+      letter-spacing:.02em;
+    }
+    .hero p{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width: 72ch;
+      font-weight:650;
+    }
+    .heroActions{
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(12,23,51,.66), rgba(12,23,51,.28));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-width:0;
+    }
+    .cardHeader{
+      padding:14px 16px 12px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHeader h3{
+      margin:0;
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color: rgba(234,240,255,.92);
+    }
+    .cardBody{
+      padding:14px 16px 16px;
+    }
+
+    .callout{
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.22);
+      border-radius: 16px;
+      padding:14px;
+    }
+    .callout b{ color: rgba(234,240,255,.90); }
+    .muted{ color: var(--muted); }
+    .muted2{ color: var(--muted2); }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+    }
+    @media(max-width:980px){
+      .shell{ grid-template-columns: 1fr; }
+      .side{ position:relative; top:auto; }
+      .grid2{ grid-template-columns: 1fr; }
+      .brand{ min-width:auto; }
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.20);
+      border-radius: 16px;
+      padding:12px 12px;
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      min-width:0;
+    }
+    .pillIcon{
+      width:34px; height:34px;
+      border-radius: 14px;
+      border:1px solid rgba(110,168,255,.22);
+      background: rgba(110,168,255,.10);
+      display:grid; place-items:center;
+      flex: 0 0 auto;
+      font-weight:900;
+      color: rgba(234,240,255,.88);
+    }
+    .item b{
+      display:block;
+      font-size:13px;
+      letter-spacing:.01em;
+      margin-bottom:4px;
+    }
+    .item span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:650;
+    }
+
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media(max-width:760px){ .row2{ grid-template-columns:1fr; } }
+
+    .field{
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.20);
+      border-radius: 16px;
+      padding:12px;
+    }
+    .field label{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+      margin:0 0 8px;
+    }
+    .field input, .field textarea, .field select{
+      width:100%;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(12,23,51,.35);
+      color: var(--fg);
+      border-radius: 12px;
+      padding:10px 10px;
+      outline:none;
+      font-weight:650;
+      font-family: var(--sans);
+    }
+    .field textarea{ min-height: 96px; resize: vertical; }
+    .hint{
+      font-size:12px;
+      color: var(--muted2);
+      font-weight:650;
+      margin-top:8px;
+    }
+
+    .divider{
+      height:1px;
+      background: var(--line);
+      margin: 10px 0;
+    }
+
+    .footerNote{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:650;
+      text-align:center;
+      margin-top:4px;
+    }
+
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center; justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+    .modal{
+      max-width:860px; width:100%;
+      border:1px solid var(--line2);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(12,23,51,.92), rgba(7,10,18,.90));
+      box-shadow: 0 30px 90px rgba(0,0,0,.60);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .modalTop strong{
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+    .modalBody{
+      padding:16px;
+      color: rgba(234,240,255,.86);
+      font-weight:650;
+    }
+    .modalBody p{ margin:0 0 10px; color: rgba(234,240,255,.82); }
+    .modalBody .small{ color:var(--muted); font-size:12px; }
+    .x{
+      border:1px solid var(--line);
+      background: rgba(7,10,18,.35);
+      color:var(--fg);
+      width:36px; height:36px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    @media print{
+      .topbar, .side, .gridFX, .heroActions, .btn { display:none !important; }
+      body{ background:#fff; color:#111; }
+      a{ color:#111; text-decoration:none; }
+      .shell{ max-width:none; padding:0; }
+      .card{ box-shadow:none; border-color:#ccc; background:#fff; }
+      .cardHeader{ border-color:#ddd; }
+      .field, .item, .callout{ border-color:#ddd; background:#fff; }
+      .field input, .field textarea, .field select{ border-color:#ddd; background:#fff; color:#111; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="gridFX"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="brand">
+        <div class="sigil" aria-hidden="true"></div>
+        <div class="brandTitle">
+          <strong>AUCTORIS</strong>
+          <span>Radar Sancionador — acesso controlado</span>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <a class="btn btnGhost" href="./index.html" title="Voltar ao portal (Home)">
+          <span class="dot" aria-hidden="true"></span> Home
+        </a>
+        <button class="btn" id="btnLimites" title="Aviso de uso / limites">
+          Aviso de uso
+        </button>
+        <a class="btn btnPrimary" href="#cadastro" title="Ir para cadastro">
+          <span class="dot" aria-hidden="true"></span> Cadastro de acesso
+        </a>
+
+        <div style="font-size:12px;color:var(--muted);font-weight:650;line-height:1.4; text-align:right">
+          Guilherme Rafael de Souza Araujo<br>
+          Advogado · Professor · Pesquisador · Escritor<br>
+          <a href="https://www.linkedin.com/in/guilhermersaraujo" target="_blank" rel="noopener">linkedin.com/in/guilhermersaraujo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <div class="sideHeader">
+        <div class="h">
+          <h2>Radar</h2>
+          <span class="badge">Entrada</span>
+        </div>
+
+        <div class="sideMeta">
+          <div class="metaCard">
+            <div class="k">Natureza</div>
+            <div class="v">Institucional</div>
+          </div>
+          <div class="metaCard">
+            <div class="k">Fonte</div>
+            <div class="v">Dados públicos</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Navegação">
+        <a href="#oquee">
+          <div>
+            <div>O que é</div>
+            <small>escopo e propósito</small>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#como">
+          <div>
+            <div>Como funciona</div>
+            <small>entrega e formato</small>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#paraquem">
+          <div>
+            <div>Para quem é</div>
+            <small>uso executivo</small>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#cadastro">
+          <div>
+            <div>Cadastro de acesso</div>
+            <small>30 dias (avaliação)</small>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#acesso">
+          <div>
+            <div>Acessar Radar</div>
+            <small>área restrita</small>
+          </div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+      </nav>
+
+      <div class="sideFooter">
+        <div><b>Regra:</b> leitura institucional, não operacional.</div>
+        <div style="margin-top:6px;">Sem avaliação individual • sem parecer • sem recomendação.</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <section class="hero" id="oquee">
+        <div class="heroInner">
+          <div>
+            <h1>Radar Sancionador — <span style="color:var(--accent2)">leitura decisória</span></h1>
+            <p>
+              Uma camada complementar ao Termômetro Regulatório: organiza decisões e atos públicos para revelar
+              <b>padrões sancionatórios</b>, sinais interpretativos e riscos institucionais recorrentes — sem consultoria,
+              sem auditoria e sem avaliação individual.
+            </p>
+          </div>
+          <div class="heroActions">
+            <a class="btn" href="./termometro.html" title="Abrir Termômetro Regulatório">
+              Termômetro
+            </a>
+            <a class="btn" href="#cadastro" title="Ir para cadastro de acesso">
+              Cadastro
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="como">
+        <div class="cardHeader">
+          <h3>Como funciona</h3>
+          <span class="badge">Entrega mensal</span>
+        </div>
+        <div class="cardBody">
+          <div class="grid2">
+            <div class="callout">
+              <p style="margin:0 0 8px;">
+                <b>Estrutura fixa.</b> Conteúdo variável por edição.
+              </p>
+              <p class="muted" style="margin:0;">
+                O Radar é publicado em formato documento (PDF/HTML), com seções constantes e linguagem executiva:
+                síntese, padrões, mapa de riscos e referências rastreáveis.
+              </p>
+            </div>
+            <div class="list" aria-label="Pontos-chave">
+              <div class="item">
+                <div class="pillIcon" aria-hidden="true">I</div>
+                <div style="min-width:0;">
+                  <b>O que o Radar faz</b>
+                  <span>Consolida leitura sancionatória a partir de fontes públicas, com foco em sinais de decisão, registro, coerência e memória institucional.</span>
+                </div>
+              </div>
+              <div class="item">
+                <div class="pillIcon" aria-hidden="true">II</div>
+                <div style="min-width:0;">
+                  <b>O que o Radar não faz</b>
+                  <span>Não avalia empresas, não recomenda ações, não executa técnica e não substitui assessoria jurídica ou técnica.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="callout">
+            <p style="margin:0 0 8px;">
+              <b>Classificação e blindagem.</b>
+            </p>
+            <p class="muted" style="margin:0;">
+              Conteúdo informativo e educacional, voltado à diretoria e conselho. O valor está na leitura institucional e na organização de padrões,
+              não em promessas de resultado.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="paraquem">
+        <div class="cardHeader">
+          <h3>Para quem é</h3>
+          <span class="badge">Uso executivo</span>
+        </div>
+        <div class="cardBody">
+          <div class="list">
+            <div class="item">
+              <div class="pillIcon" aria-hidden="true">🏛</div>
+              <div style="min-width:0;">
+                <b>Diretoria, conselho e jurídico interno</b>
+                <span>Leitura de riscos institucionais e sinais interpretativos em decisões públicas.</span>
+              </div>
+            </div>
+            <div class="item">
+              <div class="pillIcon" aria-hidden="true">⟡</div>
+              <div style="min-width:0;">
+                <b>Lideranças responsáveis por dados</b>
+                <span>Visibilidade sobre padrões sancionatórios e expectativas implícitas de governança demonstrável.</span>
+              </div>
+            </div>
+            <div class="item">
+              <div class="pillIcon" aria-hidden="true">⚖</div>
+              <div style="min-width:0;">
+                <b>Ambientes sensíveis</b>
+                <span>Decisões e narrativas sob pressão: tempo, prova e coerência como vetores de leitura institucional.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="cadastro">
+        <div class="cardHeader">
+          <h3>Cadastro de acesso</h3>
+          <span class="badge">30 dias (avaliação)</span>
+        </div>
+        <div class="cardBody">
+          <div class="grid2">
+            <div>
+              <div class="callout">
+                <p style="margin:0 0 8px;">
+                  <b>Entrada controlada.</b> O Radar é disponibilizado mediante cadastro.
+                </p>
+                <p class="muted" style="margin:0 0 10px;">
+                  Você pode solicitar um <b>período inicial de avaliação (30 dias)</b>. Após o período, o acesso é mantido conforme continuidade autorizada.
+                </p>
+                <p class="muted2" style="margin:0;">
+                  Canal institucional: <b>guilhermersaraujo@proton.me</b>
+                </p>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="list">
+                <div class="item">
+                  <div class="pillIcon" aria-hidden="true">⟂</div>
+                  <div style="min-width:0;">
+                    <b>Regra de uso</b>
+                    <span>Conteúdo informativo e educacional. Vedada reprodução e uso derivado sem autorização.</span>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="pillIcon" aria-hidden="true">◎</div>
+                  <div style="min-width:0;">
+                    <b>Foco do cadastro</b>
+                    <span>Identificação mínima e contexto. Sem coleta de dados sensíveis.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <form class="form" id="formCadastro" autocomplete="on">
+                <div class="row2">
+                  <div class="field">
+                    <label for="nome">Nome</label>
+                    <input id="nome" name="nome" type="text" placeholder="Nome e sobrenome" required />
+                  </div>
+                  <div class="field">
+                    <label for="email">E-mail</label>
+                    <input id="email" name="email" type="email" placeholder="nome@empresa.com" required />
+                  </div>
+                </div>
+
+                <div class="row2">
+                  <div class="field">
+                    <label for="empresa">Empresa / Instituição</label>
+                    <input id="empresa" name="empresa" type="text" placeholder="Organização" />
+                  </div>
+                  <div class="field">
+                    <label for="setor">Setor</label>
+                    <select id="setor" name="setor">
+                      <option value="Tecnologia">Tecnologia</option>
+                      <option value="Fintech">Fintech</option>
+                      <option value="Saúde Digital">Saúde Digital</option>
+                      <option value="Setor Público">Setor Público</option>
+                      <option value="Outros">Outros</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="objetivo">Objetivo (curto)</label>
+                  <textarea id="objetivo" name="objetivo" placeholder="Ex.: leitura institucional para diretoria; revisão de padrões sancionatórios; preparação de agenda de governança."></textarea>
+                  <div class="hint">
+                    Sem descrição operacional. Sem dados sensíveis. Sem identificação de casos particulares.
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                  <button type="submit" class="btn btnPrimary" title="Gerar solicitação por e-mail">
+                    <span class="dot" aria-hidden="true"></span> Enviar solicitação
+                  </button>
+                  <a class="btn" id="btnMailto" href="#" title="Abrir e-mail com texto pronto">
+                    Abrir e-mail
+                  </a>
+                  <button type="button" class="btn btnGhost" id="btnModelo" title="Ver modelo de mensagem mínima">
+                    Modelo
+                  </button>
+                </div>
+
+                <div class="hint">
+                  Ao enviar, será aberto um e-mail com um texto padrão. Você revisa e envia.
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="acesso">
+        <div class="cardHeader">
+          <h3>Acessar Radar</h3>
+          <span class="badge">Área restrita</span>
+        </div>
+        <div class="cardBody">
+          <div class="callout">
+            <p style="margin:0 0 10px;">
+              <b>Após autorização</b>, o acesso ao relatório mensal pode ser realizado pelo atalho abaixo.
+            </p>
+            <p class="muted" style="margin:0 0 12px;">
+              Este link aponta para o HTML/PDF do Radar hospedado no próprio portal (GitHub Pages).
+            </p>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a class="btn btnPrimary" href="./radar.html" title="Abrir Radar (restrito)">
+                <span class="dot" aria-hidden="true"></span> Entrar no Radar
+              </a>
+              <a class="btn" href="./radar-relatorio-2026-01.html" title="Abrir exemplo de relatório mensal">
+                Exemplo (relatório)
+              </a>
+            </div>
+
+            <div class="hint" style="margin-top:12px;">
+              Observação: sem backend. Controle de acesso operacional (se necessário) será feito por publicação seletiva/links controlados.
+            </div>
+          </div>
+
+          <div class="footerNote">
+            O Termômetro cria hábito. O Radar cria valor. O AUCTORIS cria poder institucional.
+          </div>
+        </div>
+      </section>
+
+      <div class="footerNote">
+        Contato: <a href="mailto:guilhermersaraujo@proton.me">guilhermersaraujo@proton.me</a>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <strong id="modalTitle">Aviso</strong>
+        <button class="x" id="modalClose" aria-label="Fechar">×</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+
+    const modalBack = $("modalBack");
+    const modalTitle = $("modalTitle");
+    const modalBody = $("modalBody");
+    const modalClose = $("modalClose");
+
+    function openModal(title, html){
+      modalTitle.textContent = title;
+      modalBody.innerHTML = html;
+      modalBack.style.display = "flex";
+      modalBack.setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      modalBack.style.display = "none";
+      modalBack.setAttribute("aria-hidden","true");
+    }
+    modalBack.addEventListener("click",(e)=>{ if(e.target===modalBack) closeModal(); });
+    modalClose.addEventListener("click", closeModal);
+
+    $("btnLimites").addEventListener("click", ()=>{
+      openModal("Aviso de uso", `
+        <p><b>Finalidade:</b> material informativo e educacional, baseado exclusivamente em <b>dados públicos</b>.</p>
+        <p><b>Não é:</b> parecer jurídico, auditoria, avaliação de conformidade, scoring de risco, monitoramento em tempo real ou recomendação operacional.</p>
+        <p><b>Limite:</b> não há avaliação individual de empresas. A interpretação depende do contexto específico.</p>
+        <p class="small">Reprodução e uso derivado sem autorização são vedados.</p>
+      `);
+    });
+
+    $("btnModelo").addEventListener("click", ()=>{
+      openModal("Modelo de mensagem mínima", `
+        <p><b>Assunto:</b> Acesso — Radar Sancionador</p>
+        <p>Solicito acesso ao Radar Sancionador (avaliação 30 dias).</p>
+        <p><b>Empresa/Setor:</b> ____</p>
+        <p><b>E-mail para recebimento:</b> ____</p>
+        <p class="small">Observação: sem dados sensíveis, sem casos específicos.</p>
+      `);
+    });
+
+    function clean(s){ return String(s||"").trim(); }
+    function esc(s){
+      return String(s||"").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+    }
+
+    function buildMailto(){
+      const nome = clean($("nome").value);
+      const email = clean($("email").value);
+      const empresa = clean($("empresa").value);
+      const setor = clean($("setor").value);
+      const objetivo = clean($("objetivo").value);
+
+      const to = "guilhermersaraujo@proton.me";
+      const subject = "Acesso — Radar Sancionador (avaliação 30 dias)";
+
+      const body =
+`Solicito acesso ao Radar Sancionador (avaliação 30 dias).
+
+Nome: ${nome || "—"}
+E-mail: ${email || "—"}
+Empresa/Instituição: ${empresa || "—"}
+Setor: ${setor || "—"}
+
+Objetivo (curto):
+${objetivo || "—"}
+
+Declaro que não incluí dados sensíveis ou informações não públicas.
+`;
+
+      const href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      return href;
+    }
+
+    const btnMailto = $("btnMailto");
+    function syncMailto(){ btnMailto.href = buildMailto(); }
+    ["nome","email","empresa","setor","objetivo"].forEach(id=>{
+      $(id).addEventListener("input", syncMailto);
+      $(id).addEventListener("change", syncMailto);
+    });
+    syncMailto();
+
+    $("formCadastro").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const nome = clean($("nome").value);
+      const email = clean($("email").value);
+
+      if(!nome || !email){
+        openModal("Cadastro", `<p>Preencha <b>Nome</b> e <b>E-mail</b> para gerar a solicitação.</p>`);
+        return;
+      }
+      window.location.href = buildMailto();
+    });
+  </script>
+</body>
+</html>

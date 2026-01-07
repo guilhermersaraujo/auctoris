@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUCTORIS — Radar Sancionador</title>
+
+<style>
+:root{
+  --bg0:#060b14;
+  --bg1:#0a1324;
+  --panel:#0e1b34;
+  --ink:#eef3ff;
+  --muted:#b9c6e6;
+  --line:rgba(255,255,255,.10);
+  --accent:#7aa7ff;
+  --accent-soft:#b6ccff;
+  --warn:#ffd27d;
+  --risk:#ff7a7a;
+  --ok:#63e6b5;
+  --radius:20px;
+  --shadow:0 24px 70px rgba(0,0,0,.55);
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 70% 8%, rgba(122,167,255,.18), transparent 55%),
+    radial-gradient(900px 600px at 20% 90%, rgba(122,167,255,.10), transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1) 55%,var(--bg0));
+}
+
+/* GRID SUTIL */
+.gridFX{
+  position:fixed; inset:0; pointer-events:none; opacity:.35;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse at 50% 18%, black 35%, transparent 70%);
+}
+
+/* TOPBAR */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  backdrop-filter:blur(12px);
+  background:rgba(6,11,20,.85);
+  border-bottom:1px solid var(--line);
+}
+.topbar .inner{
+  max-width:1200px;
+  margin:0 auto;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.brand{
+  display:flex;
+  flex-direction:column;
+}
+.brand strong{
+  font-size:12px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+}
+.brand span{
+  font-size:12px;
+  color:var(--muted);
+}
+.nav a{
+  margin-left:18px;
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent-soft);
+  text-decoration:none;
+  border-bottom:1px solid rgba(122,167,255,.35);
+}
+.nav a:hover{border-bottom-color:rgba(122,167,255,.9)}
+
+/* CONTAINER */
+.wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:30px 18px 110px;
+}
+
+/* HERO */
+.hero{
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(122,167,255,.22), rgba(14,27,52,.85) 55%);
+  box-shadow:var(--shadow);
+  padding:38px;
+}
+.hero .kicker{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.75);
+}
+.hero h1{
+  margin:14px 0 10px;
+  font-size:38px;
+  line-height:1.15;
+  font-weight:900;
+}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero p{
+  margin:0;
+  max-width:75ch;
+  font-size:16px;
+  line-height:1.7;
+  color:var(--muted);
+}
+
+/* STATUS */
+.statusBar{
+  margin-top:26px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+@media(max-width:900px){
+  .statusBar{grid-template-columns:1fr}
+}
+.status{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  background:rgba(255,255,255,.04);
+}
+.status b{
+  display:block;
+  font-size:14px;
+  letter-spacing:.06em;
+  margin-bottom:6px;
+}
+.status span{
+  font-size:13px;
+  color:var(--muted);
+}
+.dot{
+  width:10px;height:10px;border-radius:50%;
+  display:inline-block;margin-right:8px;
+}
+
+/* SEÇÕES */
+.section{
+  margin-top:40px;
+}
+.section h2{
+  margin:0 0 18px;
+  font-size:22px;
+  letter-spacing:.04em;
+}
+
+/* KPI */
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+}
+@media(max-width:1000px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .kpis{grid-template-columns:1fr}
+}
+.kpi{
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+  padding:22px;
+}
+.kpi label{
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.kpi strong{
+  display:block;
+  margin-top:8px;
+  font-size:18px;
+}
+.kpi p{
+  margin:6px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* TEXTO */
+.textBox{
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+  padding:26px;
+}
+.textBox p{
+  margin:0;
+  font-size:15px;
+  line-height:1.75;
+  color:var(--muted);
+}
+
+/* FOOTER NAV */
+.footerNav{
+  margin-top:46px;
+  border-top:1px solid var(--line);
+  padding-top:22px;
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  flex-wrap:wrap;
+}
+.footerNav a{
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent-soft);
+  text-decoration:none;
+  border-bottom:1px solid rgba(122,167,255,.35);
+}
+.footerNav a:hover{border-bottom-color:rgba(122,167,255,.9)}
+.footerNote{
+  margin-top:14px;
+  font-size:12px;
+  color:rgba(255,255,255,.65);
+  max-width:70ch;
+}
+</style>
+</head>
+
+<body>
+<div class="gridFX"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <strong>AUCTORIS</strong>
+      <span>Radar Sancionador — leitura institucional</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="termometro.html">Voltar</a>
+      <a href="radar-relatorio-2026-01.html">Avançar</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="hero">
+  <div class="kicker">Radar sancionador · leitura executiva</div>
+  <h1>Radar Sancionador<br><em>padrões decisórios e exposição institucional</em></h1>
+  <p>
+    O Radar organiza decisões e atos públicos para revelar padrões sancionatórios,
+    sinais interpretativos e vetores recorrentes de risco institucional.
+    Não avalia empresas, não emite parecer e não recomenda ações.
+  </p>
+
+  <div class="statusBar">
+    <div class="status">
+      <b><span class="dot" style="background:var(--warn)"></span>Status geral</b>
+      <span>Estabilidade com intensificação seletiva</span>
+    </div>
+    <div class="status">
+      <b><span class="dot" style="background:var(--risk)"></span>Foco recorrente</b>
+      <span>Tempo de resposta, prova e coerência narrativa</span>
+    </div>
+    <div class="status">
+      <b><span class="dot" style="background:var(--ok)"></span>Leitura dominante</b>
+      <span>Governança decisória demonstrável</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Painel sintético</h2>
+  <div class="kpis">
+    <div class="kpi">
+      <label>Vetor crítico</label>
+      <strong>Rastreabilidade</strong>
+      <p>Registro consistente da decisão institucional.</p>
+    </div>
+    <div class="kpi">
+      <label>Erro recorrente</label>
+      <strong>Resposta tardia</strong>
+      <p>Reação fragmentada após eventos sensíveis.</p>
+    </div>
+    <div class="kpi">
+      <label>Agravante típico</label>
+      <strong>Narrativa frágil</strong>
+      <p>Desalinhamento entre fato, registro e discurso.</p>
+    </div>
+    <div class="kpi">
+      <label>Sinal dominante</label>
+      <strong>Governança</strong>
+      <p>Quem decide, quando decide e com qual lastro.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Leitura institucional consolidada</h2>
+  <div class="textBox">
+    <p>
+      O Radar indica deslocamento do foco exclusivamente técnico para uma leitura
+      institucional mais ampla. Autoridades priorizam demonstrações de comando,
+      coerência e preservação mínima de evidências nas primeiras horas após eventos
+      críticos. A ausência desses sinais tende a intensificar a leitura sancionadora,
+      mesmo sem alteração normativa formal.
+    </p>
+  </div>
+</section>
+
+<div class="footerNav">
+  <a href="index.html">Home</a>
+  <a href="termometro.html">Voltar · Termômetro</a>
+  <a href="radar-relatorio-2026-01.html">Avançar · Relatório</a>
+</div>
+
+<div class="footerNote">
+  Conteúdo informativo e educacional, baseado exclusivamente em dados públicos.
+  Não constitui parecer jurídico, avaliação de conformidade ou recomendação operacional.
+</div>
+
+</main>
+</body>
+</html>
