@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUCTORIS — Painel de Decisão (Incidente Cibernético)</title>
+
+<style>
+:root{
+  --bg0:#050c16;
+  --bg1:#06101c;
+  --panel:#0b1627;
+  --card:#0c1830;
+  --card2:#0b1a3b;
+  --ink:#eaf0ff;
+  --muted:rgba(234,240,255,.70);
+  --muted2:rgba(234,240,255,.52);
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.14);
+  --accent:#9fb7ff;
+  --accent2:#d7e2ff;
+  --ok:#46D39A;
+  --warn:#F2C14E;
+  --risk:#FF6B6B;
+
+  --shadow:0 18px 60px rgba(0,0,0,.50);
+  --radius:22px;
+  --radius2:16px;
+
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 700px at 70% 10%, rgba(159,183,255,.12), transparent 55%),
+    radial-gradient(900px 600px at 20% 90%, rgba(159,183,255,.08), transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1) 60%,var(--bg0));
+  overflow-x:hidden;
+}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* GRID SUTIL */
+.gridFX{
+  position:fixed; inset:0; pointer-events:none; opacity:.33;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse at 50% 16%, black 35%, transparent 70%);
+}
+
+/* TOPBAR */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter:blur(12px);
+  background:rgba(5,12,22,.86);
+  border-bottom:1px solid var(--line);
+}
+.topbar .inner{
+  max-width:1240px; margin:0 auto;
+  padding:14px 18px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+}
+.brand{
+  display:flex; flex-direction:column; gap:2px;
+}
+.brand strong{
+  font-size:12px; letter-spacing:.28em; text-transform:uppercase; font-weight:900;
+}
+.brand span{font-size:12px;color:var(--muted)}
+.nav{
+  display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+}
+.nav a{
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent2);
+  border-bottom:1px solid rgba(159,183,255,.35);
+  padding-bottom:2px;
+}
+.nav a:hover{border-bottom-color:rgba(159,183,255,.9)}
+.pill{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  color:var(--muted);
+  display:flex; align-items:center; gap:10px;
+}
+.dot{
+  width:10px;height:10px;border-radius:50%;
+  background:rgba(159,183,255,.8);
+  box-shadow:0 0 0 4px rgba(159,183,255,.12);
+}
+
+.wrap{max-width:1240px;margin:0 auto;padding:22px 18px 90px}
+
+/* LAYOUT */
+.shell{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:18px;
+  margin-top:18px;
+}
+@media(max-width:1020px){
+  .shell{grid-template-columns:1fr}
+}
+
+/* SIDEBAR */
+.side{
+  position:sticky; top:74px; align-self:start;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(12,24,48,.62), rgba(12,24,48,.30));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.sideHeader{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--line);
+}
+.kicker{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.78);
+}
+.sideHeader h1{
+  margin:10px 0 6px;
+  font-size:18px;
+  letter-spacing:.02em;
+}
+.sideHeader p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+  font-weight:650;
+}
+.sideMeta{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.metaCard{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.26);
+  border-radius:16px;
+  padding:10px;
+}
+.metaCard .k{
+  color:var(--muted2);
+  font-size:11px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.metaCard .v{
+  font-weight:900;
+  font-size:13px;
+  color:rgba(234,240,255,.92);
+}
+.sideNav{
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.sideNav a{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.22);
+  border-radius:16px;
+  padding:12px;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-weight:850;
+  letter-spacing:.02em;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.sideNav a:hover{
+  transform:translateY(-1px);
+  border-color:rgba(159,183,255,.24);
+  background:rgba(12,26,65,.52);
+}
+.sideNav small{display:block;color:var(--muted);font-weight:650;margin-top:2px}
+.arrow{
+  width:28px;height:28px;border-radius:12px;
+  border:1px solid var(--line);
+  display:grid;place-items:center;
+  background:rgba(12,24,48,.35);
+}
+.arrow:before{content:"›";font-size:18px;color:rgba(234,240,255,.78);transform:translateX(1px)}
+.sideFooter{
+  padding:12px 16px 14px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+
+/* MAIN */
+.main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.hero{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(1000px 500px at 18% 10%, rgba(159,183,255,.16), transparent 60%),
+    linear-gradient(135deg, rgba(159,183,255,.12), rgba(12,24,48,.58) 45%, rgba(12,24,48,.30));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+}
+.hero:after{
+  content:"";
+  position:absolute; inset:-20%;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(215,226,255,.14), transparent 45%),
+    radial-gradient(circle at 75% 40%, rgba(159,183,255,.12), transparent 45%);
+  transform: rotate(-8deg);
+  pointer-events:none;
+  opacity:.85;
+}
+.heroInner{
+  position:relative;
+  padding:20px 18px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.hero h2{
+  margin:0;
+  font-size:22px;
+}
+.hero p{
+  margin:8px 0 0;
+  color:var(--muted);
+  max-width:78ch;
+  font-weight:650;
+}
+.heroTools{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:rgba(12,24,48,.42);
+  color:var(--ink);
+  padding:10px 12px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  display:inline-flex; align-items:center; gap:10px;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(159,183,255,.28);
+  background:rgba(12,26,65,.56);
+}
+.btnPrimary{
+  border-color:rgba(159,183,255,.38);
+  background:linear-gradient(180deg, rgba(159,183,255,.18), rgba(12,24,48,.30));
+  box-shadow:0 20px 40px rgba(159,183,255,.10);
+}
+.btnGhost{background:transparent}
+.badge{
+  font-size:11px;
+  color:rgba(234,240,255,.78);
+  border:1px solid rgba(255,255,255,.12);
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(7,10,18,.35);
+  white-space:nowrap;
+}
+.sep{
+  height:1px;
+  background:var(--line);
+  margin:10px 0;
+}
+
+/* CARDS */
+.card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(12,24,48,.62), rgba(12,24,48,.26));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.cardHead{
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.cardHead h3{
+  margin:0;
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(234,240,255,.92);
+}
+.cardBody{padding:14px 16px 16px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:980px){
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+
+.kpi{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.22);
+  border-radius:18px;
+  padding:14px 14px;
+}
+.kpi .k{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  font-weight:900;
+}
+.kpi .v{
+  font-weight:950;
+  font-size:14px;
+}
+.kpi .s{
+  margin-top:6px;
+  font-size:12px;
+  color:var(--muted2);
+  font-weight:650;
+}
+
+.timeline{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.step{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.20);
+  border-radius:18px;
+  padding:12px 12px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.step .t{
+  width:44px; height:44px;
+  border-radius:16px;
+  border:1px solid rgba(159,183,255,.22);
+  background:rgba(159,183,255,.10);
+  display:grid; place-items:center;
+  font-weight:950;
+  font-family:var(--mono);
+  color:rgba(234,240,255,.90);
+  flex:0 0 auto;
+}
+.step b{display:block;font-size:13px;margin-bottom:3px}
+.step span{display:block;color:var(--muted);font-size:12px;font-weight:650;line-height:1.45}
+
+.gates{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.gate{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.20);
+  border-radius:18px;
+  padding:12px;
+}
+.gateTop{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.gateTop b{font-size:13px}
+.pulse{
+  width:10px;height:10px;border-radius:50%;
+  box-shadow:0 0 0 4px rgba(255,255,255,.08);
+}
+.pulse.risk{background:var(--risk); box-shadow:0 0 0 4px rgba(255,107,107,.14)}
+.pulse.warn{background:var(--warn); box-shadow:0 0 0 4px rgba(242,193,78,.14)}
+.pulse.ok{background:var(--ok); box-shadow:0 0 0 4px rgba(70,211,154,.14)}
+.gate p{margin:8px 0 0;color:var(--muted);font-size:12px;font-weight:650;line-height:1.5}
+
+.qa{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.q{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.20);
+  border-radius:18px;
+  padding:12px;
+}
+.qTop{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.qTop b{font-size:13px}
+.qTop small{color:var(--muted);font-weight:650}
+.answer{
+  margin-top:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  background:rgba(12,24,48,.35);
+  padding:12px;
+  color:rgba(234,240,255,.86);
+  font-size:12px;
+  line-height:1.6;
+  font-weight:650;
+}
+.locked{
+  position:relative;
+  filter: blur(6px);
+  opacity:.65;
+  user-select:none;
+  pointer-events:none;
+}
+.lockNote{
+  margin-top:10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:650;
+}
+
+.inputRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+@media(max-width:760px){ .inputRow{grid-template-columns:1fr} }
+
+.field{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.20);
+  border-radius:18px;
+  padding:12px;
+}
+.field label{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-weight:900;
+  margin:0 0 8px;
+}
+.field input,.field textarea,.field select{
+  width:100%;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(12,24,48,.35);
+  color:var(--ink);
+  border-radius:14px;
+  padding:10px 10px;
+  outline:none;
+  font-weight:700;
+  font-family:var(--sans);
+}
+.field textarea{min-height:92px;resize:vertical}
+.hint{margin-top:8px;font-size:12px;color:var(--muted2);font-weight:650}
+
+.footerNote{
+  margin-top:14px;
+  color:rgba(255,255,255,.66);
+  font-size:12px;
+  line-height:1.6;
+}
+
+.modalBack{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:18px;
+  z-index:100;
+}
+.modal{
+  max-width:920px; width:100%;
+  border:1px solid var(--line2);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg, rgba(12,24,48,.92), rgba(7,10,18,.90));
+  box-shadow:0 30px 90px rgba(0,0,0,.60);
+  overflow:hidden;
+}
+.modalTop{
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.modalTop strong{
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-size:12px;
+}
+.modalBody{
+  padding:16px;
+  color:rgba(234,240,255,.86);
+  font-weight:650;
+}
+.modalBody p{margin:0 0 10px;color:rgba(234,240,255,.82)}
+.modalBody .small{color:var(--muted);font-size:12px}
+.x{
+  border:1px solid var(--line);
+  background:rgba(7,10,18,.35);
+  color:var(--ink);
+  width:36px;height:36px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:950;
+}
+
+@media print{
+  .topbar,.gridFX,.side,.heroTools,.btn,.modalBack{display:none !important}
+  body{background:#fff;color:#111}
+  a{color:#111;text-decoration:none}
+  .wrap{max-width:none;padding:0}
+  .card{box-shadow:none;border-color:#ccc;background:#fff}
+  .cardHead{border-color:#ddd}
+  .kpi,.step,.gate,.q,.field{border-color:#ddd;background:#fff}
+  .answer{border-color:#ddd;background:#fff;color:#111}
+  .locked{filter:none;opacity:1}
+}
+</style>
+</head>
+
+<body>
+<div class="gridFX"></div>
+
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <strong>AUCTORIS</strong>
+      <span>Painel de decisão — incidente cibernético (exemplo)</span>
+    </div>
+    <div class="nav">
+      <a href="index.html">Home</a>
+      <a href="radar.html">Voltar</a>
+      <a href="radar-relatorio-2026-01.html">Avançar</a>
+      <div class="pill" title="Modo de demonstração (respostas ocultas)">
+        <span class="dot" aria-hidden="true"></span>
+        Demo · Respostas ocultas
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="shell">
+
+    <aside class="side">
+      <div class="sideHeader">
+        <div class="kicker">Dashboard institucional</div>
+        <h1>Painel de decisão (exemplo)</h1>
+        <p>
+          Estrutura de apoio para diretoria e conselho nas primeiras horas.
+          Linguagem executiva. Conteúdo demonstrativo. Respostas estratégicas ocultas.
+        </p>
+
+        <div class="sideMeta">
+          <div class="metaCard">
+            <div class="k">Janela crítica</div>
+            <div class="v">0–24h</div>
+          </div>
+          <div class="metaCard">
+            <div class="k">Âncora</div>
+            <div class="v">Decisão · Prova</div>
+          </div>
+          <div class="metaCard">
+            <div class="k">Risco</div>
+            <div class="v">Narrativa</div>
+          </div>
+          <div class="metaCard">
+            <div class="k">Modo</div>
+            <div class="v">Demonstração</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sideNav" aria-label="Navegação">
+        <a href="#visao">
+          <div>Visão executiva<small>status e direção</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#timeline">
+          <div>Janela 0–24h<small>sequência mínima</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#gates">
+          <div>Gates decisórios<small>travas e critérios</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#qa">
+          <div>Perguntas do conselho<small>respostas ocultas</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#intake">
+          <div>Intake do evento<small>contexto mínimo</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+        <a href="#link">
+          <div>Link personalizado<small>seu dashboard</small></div>
+          <div class="arrow" aria-hidden="true"></div>
+        </a>
+      </nav>
+
+      <div class="sideFooter">
+        <b>Regra:</b> não operacional. Estrutura para decisão e registro.
+        <div style="margin-top:6px;">Sem parecer • sem auditoria • sem avaliação individual.</div>
+      </div>
+    </aside>
+
+    <section class="main">
+
+      <section class="hero" id="visao">
+        <div class="heroInner">
+          <div>
+            <h2>Painel de decisão — <span style="color:var(--accent2)">exemplo para incidentes</span></h2>
+            <p>
+              Demonstra o potencial de um painel personalizado por empresa (mapa regulatório, critérios internos,
+              modelo de narrativa, trilha de prova e gates de decisão). As respostas estratégicas estão ocultas.
+            </p>
+          </div>
+          <div class="heroTools">
+            <button class="btn btnPrimary" id="btnToggle" title="Alternar modo: ocultar/mostrar respostas">
+              <span class="dot" aria-hidden="true"></span> Alternar respostas
+            </button>
+            <button class="btn" id="btnAviso" title="Aviso de uso / limites">
+              Aviso
+            </button>
+            <button class="btn btnGhost" id="btnExport" title="Exportar texto (para registro interno)">
+              Exportar log
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHead">
+          <h3>Status execut ivo</h3>
+          <span class="badge">Exemplo</span>
+        </div>
+        <div class="cardBody">
+          <div class="grid3">
+            <div class="kpi">
+              <div class="k">Condição do evento</div>
+              <div class="v"><span class="pulse warn" style="display:inline-block;margin-right:8px"></span>Em apuração</div>
+              <div class="s">Hipóteses abertas. Controle de narrativa ainda recuperável.</div>
+            </div>
+            <div class="kpi">
+              <div class="k">Risco dominante</div>
+              <div class="v"><span class="pulse risk" style="display:inline-block;margin-right:8px"></span>Perda de prova</div>
+              <div class="s">Sem prova, a instituição “perde o caso” antes do caso.</div>
+            </div>
+            <div class="kpi">
+              <div class="k">Prioridade de direção</div>
+              <div class="v"><span class="pulse ok" style="display:inline-block;margin-right:8px"></span>Decisão rastreável</div>
+              <div class="s">Quem decide, quando decide, com qual lastro.</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="grid2">
+            <div class="kpi">
+              <div class="k">Mandato (governança)</div>
+              <div class="v">Comando e trilha decisória</div>
+              <div class="s">Definição do “centro” institucional do incidente.</div>
+            </div>
+            <div class="kpi">
+              <div class="k">Mandato (prova)</div>
+              <div class="v">Preservação mínima imediata</div>
+              <div class="s">Registros críticos antes de qualquer “limpeza”.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="timeline">
+        <div class="cardHead">
+          <h3>Janela 0–24h</h3>
+          <span class="badge">Sequência mínima</span>
+        </div>
+        <div class="cardBody">
+          <div class="timeline">
+            <div class="step">
+              <div class="t">0–1h</div>
+              <div>
+                <b>Declarar incidente como evento institucional</b>
+                <span>Ativar comando, travar narrativas paralelas e formalizar a janela de preservação mínima.</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="t">1–4h</div>
+              <div>
+                <b>Trilha de prova + mapa de decisões</b>
+                <span>Registrar hipóteses, decisões, responsáveis e evidências iniciais (sem promessas públicas).</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="t">4–12h</div>
+              <div>
+                <b>Gates de comunicação e regulação</b>
+                <span>Definir critérios de notificação, mensagens e limites. Evitar “confissão” por redação imprudente.</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="t">12–24h</div>
+              <div>
+                <b>Versão institucional do fato</b>
+                <span>Consolidar narrativa mínima: o que se sabe, o que não se sabe, e o que está sendo feito.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="gates">
+        <div class="cardHead">
+          <h3>Gates decisórios</h3>
+          <span class="badge">Travas</span>
+        </div>
+        <div class="cardBody">
+          <div class="gates">
+            <div class="gate">
+              <div class="gateTop">
+                <b>Gate 1 — Definição de comando</b>
+                <span class="badge"><span class="pulse warn" aria-hidden="true"></span> Aberto</span>
+              </div>
+              <p>Sem comando reconhecido, o incidente vira uma soma de mensagens e ações sem lastro.</p>
+            </div>
+
+            <div class="gate">
+              <div class="gateTop">
+                <b>Gate 2 — Preservação mínima de evidências</b>
+                <span class="badge"><span class="pulse risk" aria-hidden="true"></span> Crítico</span>
+              </div>
+              <p>Se a prova se perde, a instituição perde o poder de sustentar sua própria versão.</p>
+            </div>
+
+            <div class="gate">
+              <div class="gateTop">
+                <b>Gate 3 — Comunicação externa</b>
+                <span class="badge"><span class="pulse warn" aria-hidden="true"></span> Condicionada</span>
+              </div>
+              <p>Comunicação antes de critério definido aumenta dano secundário e risco regulatório.</p>
+            </div>
+
+            <div class="gate">
+              <div class="gateTop">
+                <b>Gate 4 — Notificação regulatória</b>
+                <span class="badge"><span class="pulse warn" aria-hidden="true"></span> Avaliação</span>
+              </div>
+              <p>A notificação não é “ato de medo”; é decisão institucional com lastro, prazo e conteúdo.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="qa">
+        <div class="cardHead">
+          <h3>Perguntas do conselho</h3>
+          <span class="badge">Respostas ocultas</span>
+        </div>
+        <div class="cardBody">
+          <div class="qa">
+
+            <div class="q">
+              <div class="qTop">
+                <b>1) O que sabemos com certeza — e o que é hipótese?</b>
+                <small>evitar narrativa contaminada</small>
+              </div>
+              <div class="answer locked" data-lock>
+                (Conteúdo oculto) Resposta personalizada conforme: superfície afetada, evidência preservada, fontes internas, cronologia e limites de declaração.
+                Inclui: “versão mínima do fato”, linguagem segura e critérios de atualização.
+              </div>
+            </div>
+
+            <div class="q">
+              <div class="qTop">
+                <b>2) Quem tem mandato para decidir? Quem registra?</b>
+                <small>cadeia decisória</small>
+              </div>
+              <div class="answer locked" data-lock>
+                (Conteúdo oculto) Matriz de mandato + trilha decisória: papéis, autoridade, regras de escalonamento e protocolo de registro (tempo, motivo, lastro).
+              </div>
+            </div>
+
+            <div class="q">
+              <div class="qTop">
+                <b>3) Qual é o risco regulatório dominante nesta janela?</b>
+                <small>priorização</small>
+              </div>
+              <div class="answer locked" data-lock>
+                (Conteúdo oculto) Leitura por autoridade e por setor: gatilhos típicos, documentação exigida, pontos de falha e linguagem de mitigação institucional.
+              </div>
+            </div>
+
+            <div class="q">
+              <div class="qTop">
+                <b>4) O que NÃO pode ser dito agora?</b>
+                <small>limites e prudência</small>
+              </div>
+              <div class="answer locked" data-lock>
+                (Conteúdo oculto) Lista de “frases proibidas” por risco: confissão inadvertida, garantia de ausência, atribuição prematura, promessa técnica, culpabilização.
+              </div>
+            </div>
+
+            <div class="q">
+              <div class="qTop">
+                <b>5) Qual é a versão institucional mínima do evento?</b>
+                <small>mensagem controlada</small>
+              </div>
+              <div class="answer locked" data-lock>
+                (Conteúdo oculto) Modelo de versão mínima + campos variáveis: escopo, incerteza, ações imediatas, compromisso com atualização, canal de contato.
+              </div>
+            </div>
+
+          </div>
+
+          <div class="lockNote">
+            <span class="badge">Modo demonstração</span>
+            <span>As respostas acima são exemplos de “camada personalizada” por empresa. Você pode alternar o modo para visualizar o formato, sem expor conteúdo final.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="intake">
+        <div class="cardHead">
+          <h3>Intake do evento</h3>
+          <span class="badge">Contexto mínimo</span>
+        </div>
+        <div class="cardBody">
+          <div class="grid2">
+            <div class="field">
+              <label for="org">Organização</label>
+              <input id="org" type="text" placeholder="Ex.: Empresa X (demo)" value="Empresa X (demo)">
+            </div>
+            <div class="field">
+              <label for="setor">Setor</label>
+              <select id="setor">
+                <option>Tecnologia</option>
+                <option>Fintech</option>
+                <option>Saúde</option>
+                <option>Varejo</option>
+                <option>Setor Público</option>
+                <option>Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="inputRow" style="margin-top:10px;">
+            <div class="field">
+              <label for="quando">Quando começou?</label>
+              <input id="quando" type="text" placeholder="Ex.: hoje 03:20 (BRT)">
+              <div class="hint">Tempo e sequência são parte da prova.</div>
+            </div>
+            <div class="field">
+              <label for="sinal">Sinal inicial</label>
+              <input id="sinal" type="text" placeholder="Ex.: indisponibilidade / alerta / acesso suspeito">
+              <div class="hint">Evite conclusões. Registre o que foi observado.</div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label for="descricao">Descrição (curta e neutra)</label>
+            <textarea id="descricao" placeholder="Descreva o fato observável, sem adjetivos e sem atribuição de causa."></textarea>
+            <div class="hint">Este painel é para decisão e registro. Não inclua dados sensíveis.</div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn btnPrimary" id="btnSalvar">
+              <span class="dot" aria-hidden="true"></span> Registrar nota
+            </button>
+            <button class="btn" id="btnCopiar">Copiar log</button>
+            <button class="btn btnGhost" id="btnLimpar">Limpar</button>
+          </div>
+
+          <div class="footerNote" id="logHint" style="margin-top:10px;">
+            Registro local (neste navegador). Sem backend. Útil para demonstração e estrutura.
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="link">
+        <div class="cardHead">
+          <h3>Link personalizado (exemplo)</h3>
+          <span class="badge">Apoio em incidente</span>
+        </div>
+        <div class="cardBody">
+          <div class="kpi">
+            <div class="k">Ideia de entrega</div>
+            <div class="v">Um painel por empresa, com respostas, gatilhos e linguagem ajustada</div>
+            <div class="s">Sem expor método completo publicamente. Demonstração mostra o formato e o potencial.</div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="kpi">
+            <div class="k">Link de demonstração (placeholder)</div>
+            <div class="v">
+              <span style="font-family:var(--mono); font-size:12px; color:rgba(234,240,255,.86)">
+                ./incident-dashboard-empresa.html
+              </span>
+            </div>
+            <div class="s">
+              Você pode subir uma versão “com respostas” separada e manter esta versão como vitrine institucional.
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="footerNote">
+            Conteúdo informativo e educacional. Não constitui parecer jurídico, auditoria, avaliação de conformidade
+            ou recomendação operacional. Estrutura voltada à decisão e registro em ambiente institucional.
+          </div>
+        </div>
+      </section>
+
+    </section>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <div class="modalTop">
+      <strong id="modalTitle">Aviso</strong>
+      <button class="x" id="modalClose" aria-label="Fechar">×</button>
+    </div>
+    <div class="modalBody" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+
+const modalBack = $("modalBack");
+const modalTitle = $("modalTitle");
+const modalBody = $("modalBody");
+const modalClose = $("modalClose");
+
+function openModal(title, html){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modalBack.style.display = "flex";
+  modalBack.setAttribute("aria-hidden","false");
+}
+function closeModal(){
+  modalBack.style.display = "none";
+  modalBack.setAttribute("aria-hidden","true");
+}
+modalBack.addEventListener("click",(e)=>{ if(e.target===modalBack) closeModal(); });
+modalClose.addEventListener("click", closeModal);
+
+$("btnAviso").addEventListener("click", ()=>{
+  openModal("Aviso de uso", `
+    <p><b>Finalidade:</b> material informativo e educacional, estrutura de apoio à <b>decisão</b> e ao <b>registro</b>, com base em dados públicos e linguagem institucional.</p>
+    <p><b>Não é:</b> parecer jurídico, auditoria, avaliação de conformidade, monitoramento em tempo real, resposta técnica, ou recomendação operacional.</p>
+    <p><b>Modo demonstração:</b> este arquivo oculta respostas estratégicas para não expor conteúdo final. Uma versão personalizada pode existir separadamente.</p>
+    <p class="small">Evite inserir dados sensíveis. Use descrições neutras e rastreáveis.</p>
+  `);
+});
+
+let unlocked = false;
+function applyLockState(){
+  document.querySelectorAll("[data-lock]").forEach(el=>{
+    if(unlocked){
+      el.classList.remove("locked");
+      el.style.pointerEvents = "auto";
+      el.style.userSelect = "text";
+    }else{
+      el.classList.add("locked");
+      el.style.pointerEvents = "none";
+      el.style.userSelect = "none";
+    }
+  });
+}
+$("btnToggle").addEventListener("click", ()=>{
+  unlocked = !unlocked;
+  applyLockState();
+  const label = unlocked ? "Respostas visíveis (demo)" : "Respostas ocultas (demo)";
+  openModal("Modo", `<p>${label}.</p><p class="small">Em produção, o acesso pode ser controlado por publicação seletiva/links privados, sem backend.</p>`);
+});
+applyLockState();
+
+/* LOG LOCAL */
+const KEY = "AU-INCIDENT-LOG-V1";
+function nowStamp(){
+  const d = new Date();
+  const pad = (n)=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function getLog(){
+  try{ return JSON.parse(localStorage.getItem(KEY) || "[]"); }catch(e){ return []; }
+}
+function setLog(arr){
+  localStorage.setItem(KEY, JSON.stringify(arr));
+}
+function renderHint(){
+  const arr = getLog();
+  $("logHint").textContent = arr.length
+    ? `Registro local: ${arr.length} nota(s) salvas neste navegador.`
+    : "Registro local (neste navegador). Sem backend. Útil para demonstração e estrutura.";
+}
+function buildEntry(){
+  const org = ($("org").value||"").trim() || "—";
+  const setor = ($("setor").value||"").trim() || "—";
+  const quando = ($("quando").value||"").trim() || "—";
+  const sinal = ($("sinal").value||"").trim() || "—";
+  const desc = ($("descricao").value||"").trim() || "—";
+  return {
+    ts: nowStamp(),
+    org, setor, quando, sinal,
+    desc
+  };
+}
+function exportText(){
+  const arr = getLog();
+  if(!arr.length) return "LOG AUCTORIS (demo)\n\n— sem registros —\n";
+  let out = "LOG AUCTORIS — INCIDENTE (DEMO)\n";
+  out += "Foco: decisão e registro\n\n";
+  arr.forEach((e,i)=>{
+    out += `#${i+1} — ${e.ts}\n`;
+    out += `Organização: ${e.org}\nSetor: ${e.setor}\nQuando: ${e.quando}\nSinal: ${e.sinal}\nDescrição: ${e.desc}\n`;
+    out += "\n";
+  });
+  return out;
+}
+
+$("btnSalvar").addEventListener("click", ()=>{
+  const entry = buildEntry();
+  const arr = getLog();
+  arr.push(entry);
+  setLog(arr);
+  renderHint();
+  openModal("Registro", `<p><b>Nota registrada.</b></p><p class="small">Timestamp: ${entry.ts}</p>`);
+});
+
+$("btnCopiar").addEventListener("click", async ()=>{
+  const txt = exportText();
+  try{
+    await navigator.clipboard.writeText(txt);
+    openModal("Copiar log", `<p><b>Copiado.</b></p><p class="small">O log foi copiado para a área de transferência.</p>`);
+  }catch(e){
+    openModal("Copiar log", `<p><b>Não foi possível copiar automaticamente.</b></p><p class="small">Use o botão Exportar log para abrir o texto e copiar manualmente.</p>`);
+  }
+});
+
+$("btnExport").addEventListener("click", ()=>{
+  const txt = exportText().replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  openModal("Exportar log", `<p class="small">Copie o texto abaixo para registro interno:</p><pre style="white-space:pre-wrap;word-break:break-word;margin:0;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(0,0,0,.18);padding:12px;color:rgba(234,240,255,.86);font-family:${getComputedStyle(document.documentElement).getPropertyValue('--mono')};font-size:12px;line-height:1.55;">${txt}</pre>`);
+});
+
+$("btnLimpar").addEventListener("click", ()=>{
+  openModal("Limpar", `
+    <p>Deseja apagar o log local deste navegador?</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <button class="btn btnPrimary" id="confirmClear"><span class="dot" aria-hidden="true"></span> Confirmar</button>
+      <button class="btn" id="cancelClear">Cancelar</button>
+    </div>
+    <p class="small">Sem backend. Afeta apenas este navegador.</p>
+  `);
+
+  setTimeout(()=>{
+    const c = document.getElementById("confirmClear");
+    const x = document.getElementById("cancelClear");
+    if(c) c.onclick = ()=>{
+      localStorage.removeItem(KEY);
+      renderHint();
+      closeModal();
+    };
+    if(x) x.onclick = closeModal;
+  }, 0);
+});
+
+renderHint();
+</script>
+</body>
+</html>
